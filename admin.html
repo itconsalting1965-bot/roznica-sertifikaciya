@@ -1,0 +1,450 @@
+<title>Админ-панель · Сертификация «Розница и склад»</title>
+<style>
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  :root {
+    --bg: #f5f5f4;
+    --surface: #ffffff;
+    --surface-2: #f0f0ee;
+    --ink: #201f1e;
+    --muted: #6f6d69;
+    --line: #e1e0dc;
+    --brand: #d6231c;
+    --brand-ink: #ffffff;
+    --brand-soft: #fbe8e7;
+    --good: #2f8a4e;
+    --good-soft: #e3f3e7;
+    --trend: #2f6fa8;
+    --shadow: 0 1px 2px rgba(32,30,28,0.06), 0 4px 16px rgba(32,30,28,0.05);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1b1a19; --surface: #242220; --surface-2: #2b2926; --ink: #f1efec; --muted: #a7a49e;
+      --line: #3a3733; --brand: #e14a42; --brand-ink: #1b1a19; --brand-soft: #3a201e;
+      --good: #2f9d82; --good-soft: #1c332c; --trend: #5b7fd6;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1b1a19; --surface: #242220; --surface-2: #2b2926; --ink: #f1efec; --muted: #a7a49e;
+    --line: #3a3733; --brand: #e14a42; --brand-ink: #1b1a19; --brand-soft: #3a201e;
+    --good: #2f9d82; --good-soft: #1c332c; --trend: #5b7fd6;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 20px rgba(0,0,0,0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #f5f5f4; --surface: #ffffff; --surface-2: #f0f0ee; --ink: #201f1e; --muted: #6f6d69;
+    --line: #e1e0dc; --brand: #d6231c; --brand-ink: #ffffff; --brand-soft: #fbe8e7;
+    --good: #2f8a4e; --good-soft: #e3f3e7; --trend: #2f6fa8;
+    --shadow: 0 1px 2px rgba(32,30,28,0.06), 0 4px 16px rgba(32,30,28,0.05);
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.5; -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 { font-weight: 800; text-wrap: balance; margin: 0; }
+  .mono { font-family: "Cascadia Code", "SFMono-Regular", Consolas, Menlo, monospace; font-variant-numeric: tabular-nums; }
+  a { color: inherit; }
+  button, input { font: inherit; }
+  :focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+
+  .brandbar { display: flex; align-items: center; gap: 10px; padding: 16px 24px; border-bottom: 1px solid var(--line); }
+  .brandbar .mark {
+    width: 30px; height: 30px; border-radius: 8px; background: var(--brand); color: var(--brand-ink);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.95rem; flex: none;
+  }
+  .brandbar .name { font-weight: 700; font-size: 0.95rem; }
+  .brandbar .name span { color: var(--muted); font-weight: 400; }
+
+  #app { max-width: 1180px; margin: 0 auto; padding: 32px 20px 96px; }
+
+  .eyebrow { font-size: 0.72rem; letter-spacing: 0.11em; text-transform: uppercase; color: var(--brand); font-weight: 700; }
+  .page-title { font-size: 1.7rem; margin-top: 6px; }
+  .page-sub { color: var(--muted); font-size: 0.92rem; margin-top: 8px; max-width: 68ch; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow); padding: 24px; }
+
+  /* ---- gate ---- */
+  .gate-wrap { max-width: 420px; margin: 60px auto; }
+  label.field-label { display: block; font-size: 0.85rem; font-weight: 700; margin-bottom: 6px; }
+  input[type="password"], input[type="text"] {
+    width: 100%; padding: 11px 13px; border-radius: 10px; border: 1px solid var(--line);
+    background: var(--surface-2); color: var(--ink); font-size: 0.95rem;
+  }
+  .primary-btn {
+    background: var(--brand); color: var(--brand-ink); border: none; border-radius: 10px;
+    padding: 12px 20px; font-size: 0.92rem; font-weight: 700; cursor: pointer;
+  }
+  .primary-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .ghost-btn {
+    background: transparent; color: var(--ink); border: 1px solid var(--line); border-radius: 10px;
+    padding: 9px 16px; font-size: 0.86rem; cursor: pointer;
+  }
+  .inline-error {
+    background: var(--brand-soft); border: 1px solid var(--brand); color: var(--brand);
+    border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; margin-top: 12px;
+  }
+
+  /* ---- dashboard ---- */
+  .toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin: 22px 0 18px; flex-wrap: wrap; }
+  .search-input { max-width: 280px; }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 26px; }
+  @media (max-width: 760px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; }
+  .stat-tile .s-label { font-size: 0.74rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-tile .s-value { font-size: 1.7rem; font-weight: 800; margin-top: 4px; }
+
+  .table-wrap { overflow-x: auto; }
+  table.people-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+  table.people-table th, table.people-table td { text-align: left; padding: 11px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  table.people-table th { color: var(--muted); font-weight: 700; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; white-space: nowrap; }
+  table.people-table td.num { text-align: right; }
+  table.people-table tr.person-row { cursor: pointer; }
+  table.people-table tr.person-row:hover { background: var(--surface-2); }
+
+  .status-chip { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 0.74rem; font-weight: 700; white-space: nowrap; }
+  .status-chip.pass { background: var(--good-soft); color: var(--good); }
+  .status-chip.fail { background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+
+  .delta { font-weight: 700; font-size: 0.85rem; }
+  .delta.up { color: var(--good); }
+  .delta.flat { color: var(--muted); }
+  .delta.down { color: var(--muted); }
+
+  .detail-row td { background: var(--surface-2); padding: 18px; }
+  .badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; margin-bottom: 16px; }
+  .mod-badge {
+    display: flex; justify-content: space-between; gap: 8px; align-items: center;
+    padding: 7px 10px; border-radius: 8px; font-size: 0.78rem; border: 1px solid var(--line); background: var(--surface);
+  }
+  .mod-badge.pass { border-color: var(--good); background: var(--good-soft); color: var(--good); }
+  .mod-badge .pct { font-family: "Cascadia Code", Consolas, monospace; font-variant-numeric: tabular-nums; }
+
+  .attempt-list { display: flex; flex-direction: column; gap: 6px; }
+  .attempt-item { display: flex; justify-content: space-between; gap: 10px; font-size: 0.8rem; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  .attempt-item:last-child { border-bottom: none; }
+  .attempt-item .a-date { color: var(--muted); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+  @media (max-width: 560px) {
+    .page-title { font-size: 1.4rem; }
+  }
+</style>
+
+<div class="brandbar">
+  <div class="mark">АК</div>
+  <div class="name">АйТи-Консалтинг <span>· админ-панель сертификации</span></div>
+</div>
+<div id="app"></div>
+
+<script>
+/* ============ НАСТРОЙКА ============ */
+/* Тот же URL веб-приложения Google Apps Script, что и в файле теста. */
+const CONFIG = {
+  API_URL: "ВСТАВЬТЕ_СЮДА_URL_ПОСЛЕ_ДЕПЛОЯ_GOOGLE_APPS_SCRIPT"
+};
+
+const PASS_THRESHOLD = 0.8;
+
+/* Список модулей курса — для построения полной сетки компетенций,
+   даже если по каким-то модулям ещё не было попыток. Должен совпадать
+   по id/title с QUESTION_BANK в файле теста. */
+const MODULE_LIST = [
+  {id:"m01", title:"Общие сведения о программе «Розница»"},
+  {id:"m02", title:"Начальные навыки работы с программой"},
+  {id:"m03", title:"Подготовительный этап: пользователи и роли"},
+  {id:"m04", title:"Подготовительный этап: классификаторы"},
+  {id:"m05", title:"Подготовительный этап: номенклатура и контрагенты"},
+  {id:"m06", title:"Ввод начальных остатков"},
+  {id:"m07", title:"Ценообразование"},
+  {id:"m08", title:"Управление закупками"},
+  {id:"m09", title:"Перемещение товаров"},
+  {id:"m10", title:"Печать ценников и этикеток"},
+  {id:"m11", title:"Розничные продажи в РМК"},
+  {id:"m12", title:"Инвентаризация товаров"},
+  {id:"m13", title:"Комплекты и комплектующие"},
+  {id:"m14", title:"Розничные продажи в режиме менеджера"},
+  {id:"m15", title:"Оптовая продажа товаров"},
+  {id:"m16", title:"Себестоимость, валовая прибыль"},
+  {id:"m17", title:"Подключаемое оборудование"}
+];
+
+const state = {
+  authed: false,
+  adminKey: "",
+  gateError: "",
+  loading: false,
+  results: [],
+  loadError: "",
+  search: "",
+  expanded: null // fio-key раскрытой строки
+};
+
+async function apiList(adminKey) {
+  const url = CONFIG.API_URL + "?action=list&adminKey=" + encodeURIComponent(adminKey);
+  const res = await fetch(url);
+  return res.json();
+}
+
+function groupByFio(results) {
+  const map = {};
+  results.forEach(r => {
+    const key = (r.fio || "").trim().toLowerCase();
+    if (!key) return;
+    if (!map[key]) map[key] = { key, fio: r.fio.trim(), attempts: [] };
+    map[key].attempts.push(r);
+  });
+  const people = Object.values(map);
+  people.forEach(p => p.attempts.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)));
+  return people;
+}
+
+function bestPerModule(person) {
+  const best = {};
+  person.attempts.forEach(att => {
+    (att.modules || []).forEach(m => {
+      const pct = m.total ? m.correct / m.total : 0;
+      if (!best[m.id] || pct > best[m.id].pct) {
+        best[m.id] = { title: m.title, correct: m.correct, total: m.total, pct };
+      }
+    });
+  });
+  return best;
+}
+
+function confirmedCount(person) {
+  const best = bestPerModule(person);
+  return Object.values(best).filter(m => m.pct >= PASS_THRESHOLD).length;
+}
+
+function sparkline(values, width, height) {
+  if (values.length === 0) return "";
+  if (values.length === 1) {
+    const y = height - (values[0] / 100) * height;
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+      <line x1="0" y1="${height - (PASS_THRESHOLD*100/100)*height}" x2="${width}" y2="${height - (PASS_THRESHOLD*100/100)*height}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2,2" />
+      <circle cx="${width/2}" cy="${y}" r="3" fill="var(--trend)" />
+    </svg>`;
+  }
+  const step = width / (values.length - 1);
+  const pts = values.map((v, i) => {
+    const x = i * step;
+    const y = height - (Math.max(0, Math.min(100, v)) / 100) * height;
+    return [x, y];
+  });
+  const path = pts.map((p, i) => (i === 0 ? "M" : "L") + p[0].toFixed(1) + "," + p[1].toFixed(1)).join(" ");
+  const areaPath = path + ` L${width},${height} L0,${height} Z`;
+  const threshY = height - (PASS_THRESHOLD*100/100) * height;
+  const last = pts[pts.length - 1];
+  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" role="img" aria-label="Динамика результатов по попыткам">
+    <line x1="0" y1="${threshY.toFixed(1)}" x2="${width}" y2="${threshY.toFixed(1)}" stroke="var(--line)" stroke-width="1" stroke-dasharray="2,2" />
+    <path d="${areaPath}" fill="var(--trend)" opacity="0.12" stroke="none" />
+    <path d="${path}" fill="none" stroke="var(--trend)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+    <circle cx="${last[0].toFixed(1)}" cy="${last[1].toFixed(1)}" r="3.2" fill="var(--trend)" />
+  </svg>`;
+}
+
+function render() {
+  const app = document.getElementById("app");
+  if (!state.authed) app.innerHTML = renderGate();
+  else app.innerHTML = renderDashboard();
+  attachHandlers();
+}
+
+function renderGate() {
+  return `
+    <div class="gate-wrap card">
+      <div class="eyebrow">Только для администратора</div>
+      <h1 class="page-title" style="margin-top:6px;">Вход в админ-панель</h1>
+      <p class="page-sub" style="margin-bottom:20px;">Введите ключ администратора, заданный в бэкенде (константа ADMIN_KEY).</p>
+      <label class="field-label" for="adminKey">Ключ администратора</label>
+      <input type="password" id="adminKey" placeholder="••••••••••••" value="${state.adminKey}" />
+      ${state.gateError ? `<div class="inline-error">${state.gateError}</div>` : ""}
+      <div style="margin-top:16px;">
+        <button id="loginBtn" class="primary-btn" ${state.loading ? "disabled" : ""}>${state.loading ? "Проверяем…" : "Войти →"}</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderDashboard() {
+  const people = groupByFio(state.results);
+  const filtered = state.search
+    ? people.filter(p => p.fio.toLowerCase().includes(state.search.toLowerCase()))
+    : people;
+  filtered.sort((a, b) => a.fio.localeCompare(b.fio, "ru"));
+
+  const totalAttempts = state.results.length;
+  const totalPeople = people.length;
+  const avgLast = totalPeople
+    ? Math.round(people.reduce((s, p) => s + (p.attempts[p.attempts.length - 1]?.overallPercent || 0), 0) / totalPeople)
+    : 0;
+  const fullyConfirmed = people.filter(p => confirmedCount(p) === MODULE_LIST.length).length;
+
+  const rows = filtered.map(p => {
+    const attempts = p.attempts;
+    const first = attempts[0].overallPercent || 0;
+    const last = attempts[attempts.length - 1].overallPercent || 0;
+    const delta = last - first;
+    const deltaCls = delta > 0 ? "up" : (delta < 0 ? "down" : "flat");
+    const deltaGlyph = delta > 0 ? "▲" : (delta < 0 ? "▼" : "—");
+    const confirmed = confirmedCount(p);
+    const spark = sparkline(attempts.map(a => a.overallPercent || 0), 96, 30);
+    const isOpen = state.expanded === p.key;
+
+    const mainRow = `<tr class="person-row" data-person="${p.key}">
+      <td>${p.fio}</td>
+      <td class="num mono">${attempts.length}</td>
+      <td class="num mono">${first}%</td>
+      <td class="num mono">${last}%</td>
+      <td class="delta ${deltaCls} num">${deltaGlyph} ${Math.abs(delta)}%</td>
+      <td>${spark}</td>
+      <td class="num"><span class="status-chip ${confirmed === MODULE_LIST.length ? 'pass':'fail'}">${confirmed}/${MODULE_LIST.length} модулей</span></td>
+    </tr>`;
+
+    let detailRow = "";
+    if (isOpen) {
+      const best = bestPerModule(p);
+      const badges = MODULE_LIST.map(m => {
+        const b = best[m.id];
+        const pass = b && b.pct >= PASS_THRESHOLD;
+        const pctTxt = b ? Math.round(b.pct * 100) + "%" : "—";
+        return `<div class="mod-badge ${pass ? 'pass' : ''}"><span>${m.title}</span><span class="pct">${pctTxt}</span></div>`;
+      }).join("");
+      const attemptsHtml = attempts.slice().reverse().map(a => {
+        const d = new Date(a.timestamp);
+        const dateStr = isNaN(d) ? a.timestamp : d.toLocaleString("ru-RU", {day:"2-digit", month:"2-digit", year:"numeric", hour:"2-digit", minute:"2-digit"});
+        return `<div class="attempt-item"><span class="a-date">${dateStr}</span><span>${a.overallCorrect}/${a.overallTotal} · ${a.overallPercent}% · ${a.overallPass ? "тест пройден" : "тест не пройден"}</span></div>`;
+      }).join("");
+      detailRow = `<tr class="detail-row"><td colspan="7">
+        <div style="font-size:0.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">Лучший результат по модулям</div>
+        <div class="badge-grid">${badges}</div>
+        <div style="font-size:0.78rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px;">История попыток</div>
+        <div class="attempt-list">${attemptsHtml}</div>
+      </td></tr>`;
+    }
+
+    return mainRow + detailRow;
+  }).join("");
+
+  const tableOrEmpty = filtered.length
+    ? `<div class="table-wrap"><table class="people-table">
+        <thead><tr>
+          <th>ФИО</th><th class="num">Попыток</th><th class="num">Первая</th><th class="num">Последняя</th>
+          <th class="num">Динамика</th><th>История</th><th class="num">Компетенции</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`
+    : `<div class="empty-state">${state.search ? "Никого не найдено по этому запросу" : "Пока никто не проходил тест"}</div>`;
+
+  return `
+    <div class="eyebrow">Сертификация · Розница и склад</div>
+    <h1 class="page-title">Сводка по сотрудникам</h1>
+    <p class="page-sub">Клик по строке разворачивает детали: лучший результат по каждому модулю и историю попыток.</p>
+
+    <div class="stat-grid">
+      <div class="stat-tile"><div class="s-label">Сотрудников</div><div class="s-value mono">${totalPeople}</div></div>
+      <div class="stat-tile"><div class="s-label">Попыток всего</div><div class="s-value mono">${totalAttempts}</div></div>
+      <div class="stat-tile"><div class="s-label">Средний % (посл. попытка)</div><div class="s-value mono">${avgLast}%</div></div>
+      <div class="stat-tile"><div class="s-label">Подтвердили весь курс</div><div class="s-value mono">${fullyConfirmed}</div></div>
+    </div>
+
+    <div class="toolbar">
+      <input type="text" id="searchInput" class="search-input" placeholder="Поиск по ФИО…" value="${state.search}" />
+      <div style="display:flex; gap:8px;">
+        <button id="refreshBtn" class="ghost-btn">${state.loading ? "Обновляем…" : "Обновить"}</button>
+        <button id="exportBtn" class="ghost-btn">Экспорт CSV</button>
+      </div>
+    </div>
+
+    ${state.loadError ? `<div class="inline-error" style="margin-bottom:16px;">${state.loadError}</div>` : ""}
+
+    <div class="card">${tableOrEmpty}</div>
+  `;
+}
+
+function exportCsv() {
+  const people = groupByFio(state.results);
+  const header = ["ФИО", "Попыток", "Первая %", "Последняя %", "Динамика", "Модулей подтверждено"].concat(MODULE_LIST.map(m => m.title));
+  const lines = [header.join(";")];
+  people.forEach(p => {
+    const attempts = p.attempts;
+    const first = attempts[0].overallPercent || 0;
+    const last = attempts[attempts.length - 1].overallPercent || 0;
+    const best = bestPerModule(p);
+    const modCols = MODULE_LIST.map(m => (best[m.id] ? Math.round(best[m.id].pct * 100) : "") + "%");
+    const row = [p.fio, attempts.length, first + "%", last + "%", (last - first) + "%", confirmedCount(p) + "/" + MODULE_LIST.length].concat(modCols);
+    lines.push(row.join(";"));
+  });
+  const blob = new Blob(["﻿" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "sertifikatsiya-roznica-sklad.csv";
+  link.click();
+}
+
+async function loadResults() {
+  state.loading = true;
+  state.loadError = "";
+  render();
+  try {
+    const res = await apiList(state.adminKey);
+    if (res.ok) {
+      state.results = res.results || [];
+    } else {
+      state.loadError = res.error || "Ошибка загрузки данных";
+    }
+  } catch (err) {
+    state.loadError = "Не удалось связаться с базой. Проверьте интернет и URL сервера.";
+  }
+  state.loading = false;
+  render();
+}
+
+function attachHandlers() {
+  if (!state.authed) {
+    const input = document.getElementById("adminKey");
+    input.addEventListener("input", e => { state.adminKey = e.target.value; });
+    input.addEventListener("keydown", e => { if (e.key === "Enter") document.getElementById("loginBtn").click(); });
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      if (!state.adminKey.trim()) return;
+      state.loading = true;
+      state.gateError = "";
+      render();
+      try {
+        const res = await apiList(state.adminKey);
+        if (res.ok) {
+          state.authed = true;
+          state.results = res.results || [];
+        } else {
+          state.gateError = res.error || "Неверный ключ администратора";
+        }
+      } catch (err) {
+        state.gateError = "Не удалось связаться с базой. Проверьте интернет-соединение и CONFIG.API_URL в этом файле.";
+      }
+      state.loading = false;
+      render();
+    });
+  } else {
+    document.getElementById("searchInput").addEventListener("input", e => { state.search = e.target.value; render(); });
+    document.getElementById("refreshBtn").addEventListener("click", () => loadResults());
+    document.getElementById("exportBtn").addEventListener("click", () => exportCsv());
+    document.querySelectorAll("tr.person-row").forEach(tr => {
+      tr.addEventListener("click", () => {
+        const key = tr.getAttribute("data-person");
+        state.expanded = state.expanded === key ? null : key;
+        render();
+      });
+    });
+  }
+}
+
+render();
+</script>
